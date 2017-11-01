@@ -7,6 +7,8 @@ services:
     image: wookietreiber/ganglia
     hostname: ganglia
     domainname: hadoop
+    ports:
+      - "127.0.0.1:80:8080"
 
   namenode:
     image: uhopper/hadoop-namenode
@@ -37,6 +39,12 @@ services:
       constraint:node=: onet1
     env_file:
       - ./hadoop.env
+    ports:
+      - "8088:8088"
+      - "8030:8030"
+      - "8031:8031"
+      - "8032:8032"
+      - "8033:8033"
 
   historyserver:
     image: uhopper/hadoop-historyserver
@@ -52,6 +60,9 @@ services:
       constraint:node=: onet1
     env_file:
       - ./hadoop.env
+    ports:
+      - "8188:8188"
+      - "10200:10200"
 
   spark:
     image: uhopper/hadoop-spark
@@ -63,6 +74,8 @@ services:
       constraint:node=: onet1
     env_file:
       - ./hadoop.env
+    ports:
+      - "18080:18080"
     command: historyserver
 
   nodemanager1:
