@@ -49,7 +49,7 @@ services:
     volumes:
       - hadoop_historyserver:/hadoop/yarn/timeline
     environment:
-      constraint:node=: onet2
+      constraint:node=: onet1
     env_file:
       - ./hadoop.env
 
@@ -59,11 +59,8 @@ services:
     hostname: spark
     networks:
       - hadoop
-      - kafka
     environment:
-      - SPARK_CONF_spark_eventLog_enabled=true
-      - SPARK_CONF_spark_eventLog_dir=hdfs://namenode.hadoop:8020/spark-logs
-      - SPARK_CONF_spark_history_fs_logDirectory=hdfs://namenode.hadoop:8020/spark-logs
+      constraint:node=: onet1
     env_file:
       - ./hadoop.env
     command: historyserver
