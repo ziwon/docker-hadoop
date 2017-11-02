@@ -3,7 +3,7 @@ version: '2'
 services:
 
   namenode:
-    image: uhopper/hadoop-namenode
+    image: uhopper/hadoop-namenode:2.8.1
     container_name: namenode
     hostname: namenode
     networks:
@@ -20,7 +20,7 @@ services:
       - "8020:8020"
 
   resourcemanager:
-    image: uhopper/hadoop-resourcemanager
+    image: uhopper/hadoop-resourcemanager:2.8.1
     container_name: resourcemanager
     hostname: resourcemanager
     depends_on:
@@ -39,7 +39,7 @@ services:
       - "8033:8033"
 
   historyserver:
-    image: uhopper/hadoop-historyserver
+    image: uhopper/hadoop-historyserver:2.8.1
     container_name: historyserver
     hostname: historyserver
     depends_on:
@@ -52,12 +52,14 @@ services:
       constraint:node=: onet1
     env_file:
       - ./hadoop.env
+    depends_on:
+      - namenode
     ports:
       - "8188:8188"
       - "10200:10200"
 
   spark:
-    image: uhopper/hadoop-spark
+    image: uhopper/hadoop-spark:2.0.2_2.8.1
     container_name: spark
     hostname: spark
     networks:
@@ -71,7 +73,7 @@ services:
     command: historyserver
 
   nodemanager1:
-    image: uhopper/hadoop-nodemanager
+    image: uhopper/hadoop-nodemanager:2.8.1
     container_name: nodemanager1
     hostname: nodemanager1
     depends_on:
@@ -86,7 +88,7 @@ services:
       - ./hadoop.env
 
   nodemanager2:
-    image: uhopper/hadoop-nodemanager
+    image: uhopper/hadoop-nodemanager:2.8.1
     container_name: nodemanager2
     hostname: nodemanager2
     depends_on:
@@ -101,7 +103,7 @@ services:
       - ./hadoop.env
 
   datanode1:
-    image: uhopper/hadoop-datanode
+    image: uhopper/hadoop-datanode:2.8.1
     container_name: datanode1
     hostname: datanode1
     depends_on:
@@ -116,7 +118,7 @@ services:
       - ./hadoop.env
 
   datanode2:
-    image: uhopper/hadoop-datanode
+    image: uhopper/hadoop-datanode:2.8.1
     container_name: datanode2
     hostname: datanode2
     depends_on:
@@ -129,6 +131,54 @@ services:
       constraint:node=: onet2
     env_file:
       - ./hadoop.env
+
+  spark-master:
+    image: uhopper/hadoop-spark:2.0.2_2.8.1
+    container_name: spark-master
+    hostname: spark-master
+    networks:
+      - hadoop
+    environment:
+      constraint:node=: onet1
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+      - "6066:6066"
+    depends_on:
+      - namenode
+      - datanode1
+      - datanode2
+    command: master
+
+  spark-slave1:
+    image: uhopper/hadoop-spark:2.0.2_2.8.1
+    container_name: spark-slave1
+    hostname: spark-slave1
+    networks:
+      - hadoop
+    environment:
+      - "constraint:node=: onet1"
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - spark-master
+    command: slave spark://spark-master:7077
+
+  spark-slave2:
+    image: uhopper/hadoop-spark:2.0.2_2.8.1
+    container_name: spark-slave2
+    hostname: spark-slave2
+    networks:
+      - hadoop
+    environment:
+      - "constraint:node=: onet2"
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - spark-master
+    command: slave spark://spark-master:7077
 
 networks:
   kafka:
