@@ -2,14 +2,6 @@ version: '2'
 
 services:
 
-  ganglia:
-    container_name: ganglia
-    image: wookietreiber/ganglia
-    hostname: ganglia
-    domainname: hadoop
-    ports:
-      - "127.0.0.1:80:8080"
-
   namenode:
     image: uhopper/hadoop-namenode
     container_name: namenode
